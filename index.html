@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entregas Programación · Bio-Python</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --sidebar-bg: #161923;
+      --sidebar-border: #262b3a;
+      --accent: #6c8cff;
+      --accent-soft: rgba(108, 140, 255, 0.15);
+      --text: #e6e8ef;
+      --text-dim: #8b90a3;
+      --card-bg: #1b1f2b;
+      --card-border: #2a2f40;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+
+    body {
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 1.05rem;
+      line-height: 1.35;
+      font-weight: 600;
+      color: var(--text);
+      padding: 24px 20px 16px;
+      margin: 0;
+      border-bottom: 1px solid var(--sidebar-border);
+    }
+
+    .sidebar-title span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .tabs {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      gap: 2px;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      font-size: 0.92rem;
+      text-align: left;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tab-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .tab-btn:disabled:hover {
+      background: transparent;
+      color: var(--text-dim);
+    }
+
+    .tab-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      font-size: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .tab-btn.active .tab-num {
+      background: var(--accent);
+      color: #0f1115;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 40px;
+    }
+
+    .panel {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+    }
+
+    .panel.active {
+      display: flex;
+    }
+
+    .panel-header {
+      margin-bottom: 20px;
+    }
+
+    .panel-header h2 {
+      margin: 0 0 6px;
+      font-size: 1.4rem;
+    }
+
+    .panel-header p {
+      margin: 0;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .pdf-wrapper {
+      flex: 1;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #20232e;
+      min-height: 0;
+    }
+
+    .pdf-wrapper embed,
+    .pdf-wrapper iframe,
+    .pdf-wrapper object {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .pdf-fallback {
+      padding: 20px;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .pdf-fallback a {
+      color: var(--accent);
+    }
+
+    .empty-card {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed var(--card-border);
+      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      text-align: center;
+      padding: 40px;
+    }
+
+    /* introducción personalizada */
+    .intro-card {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 30px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .intro-card .avatar {
+      font-size: 4.2rem;
+      margin-bottom: 8px;
+      background: var(--accent-soft);
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+    }
+
+    .intro-card h2 {
+      font-size: 2rem;
+      margin: 16px 0 4px;
+      font-weight: 500;
+    }
+
+    .intro-card h2 span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .intro-card .sub {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-top: 4px;
+      border-bottom: 1px solid var(--sidebar-border);
+      padding-bottom: 16px;
+      width: 80%;
+    }
+
+    .intro-card .bio-text {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text);
+      margin: 20px 0 10px;
+      max-width: 550px;
+    }
+
+    .intro-card .badge {
+      background: var(--accent-soft);
+      padding: 8px 18px;
+      border-radius: 40px;
+      color: var(--accent);
+      font-weight: 500;
+      font-size: 0.85rem;
+      letter-spacing: 0.3px;
+      border: 1px solid rgba(108, 140, 255, 0.2);
+      margin-top: 12px;
+    }
+
+    .intro-card .badge i {
+      font-style: normal;
+      display: inline-block;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h1 class="sidebar-title">Entregas Programación<br><span>Bio-Python</span></h1>
+      <nav class="tabs" id="tabs"></nav>
+    </aside>
+
+    <main class="content" id="content"></main>
+  </div>
+
+  <script>
+    const TOTAL_ENTREGAS = 17;
+    const tabsEl = document.getElementById("tabs");
+    const contentEl = document.getElementById("content");
+
+    const pdfName = (n) => `EntregaSemana_${n}.pdf`;
+
+    // ---------- CONSTRUIR PESTAÑAS (incluye introducción) ----------
+    function buildTabs() {
+      // 1. Botón de introducción (siempre activo, sin número)
+      const introBtn = document.createElement("button");
+      introBtn.className = "tab-btn active";
+      introBtn.dataset.tab = "intro";
+      introBtn.innerHTML = `<span class="tab-num">✦</span> Introducción`;
+      introBtn.addEventListener("click", () => activateTab("intro"));
+      tabsEl.appendChild(introBtn);
+
+      // 2. Entregas semanas 1..17
+      for (let i = 1; i <= TOTAL_ENTREGAS; i++) {
+        const btn = document.createElement("button");
+        btn.className = "tab-btn";
+        btn.dataset.tab = i;
+        btn.disabled = true; // se habilita solo si existe su PDF
+        btn.innerHTML = `<span class="tab-num">${i}</span> Semana ${i}`;
+        btn.addEventListener("click", () => activateTab(i));
+        tabsEl.appendChild(btn);
+      }
+    }
+
+    // ---------- PANELES (incluye introducción + semanas) ----------
+    function buildPanels() {
+      // Panel de introducción (personalizado para Andrea)
+      const introPanel = document.createElement("section");
+      introPanel.className = "panel active";
+      introPanel.id = "panel-intro";
+      introPanel.innerHTML = `
+        <div class="intro-card">
+          <div class="avatar">🧬</div>
+          <h2>Hola, soy <span>Andrea</span></h2>
+          <div class="sub">Estudiante de Biología · 2026-02</div>
+          <div class="bio-text">
+            Bienvenida a tu espacio de entregas de <strong>Programación Bio-Python</strong>.
+            Este es tu cuaderno digital donde cada semana encontrarás el material 
+            que has ido construyendo. Disfruta del viaje por el código y la biología.
+          </div>
+          <div class="badge"><i>🌱</i> exploradora de datos biológicos</div>
+        </div>
+      `;
+      contentEl.appendChild(introPanel);
+
+      // Paneles de semanas (1..17)
+      for (let i = 1; i <= TOTAL_ENTREGAS; i++) {
+        const panel = document.createElement("section");
+        panel.className = "panel";
+        panel.id = `panel-${i}`;
+        panel.innerHTML = `
+          <div class="panel-header">
+            <h2>Semana ${i}</h2>
+            <p>Contenido pendiente por agregar</p>
+          </div>
+          <div class="empty-card">Aún no se ha añadido el archivo "${pdfName(i)}" para esta semana.</div>
+        `;
+        contentEl.appendChild(panel);
+      }
+    }
+
+    // ---------- RENDER PDF ----------
+    function renderPdf(n) {
+      const name = pdfName(n);
+      const panel = document.getElementById(`panel-${n}`);
+      panel.innerHTML = `
+        <div class="panel-header">
+          <h2>Semana ${n}</h2>
+          <p>Visualización embebida: ${name}</p>
+        </div>
+        <div class="pdf-wrapper">
+          <embed src="${name}" type="application/pdf" />
+        </div>
+        <div class="pdf-fallback">
+          Si el PDF no se visualiza correctamente, puedes <a href="${name}" target="_blank" rel="noopener">abrirlo en una nueva pestaña</a>.
+        </div>
+      `;
+    }
+
+    function enableTab(n) {
+      const btn = tabsEl.querySelector(`.tab-btn[data-tab="${n}"]`);
+      if (btn) btn.disabled = false;
+    }
+
+    // ---------- DETECTAR PDFs ----------
+    function fileExists(url) {
+      return new Promise((resolve) => {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url;
+        link.onload = () => { link.remove(); resolve(true); };
+        link.onerror = () => { link.remove(); resolve(false); };
+        document.head.appendChild(link);
+      });
+    }
+
+    async function detectPdfs() {
+      const found = [];
+      await Promise.all(
+        Array.from({ length: TOTAL_ENTREGAS }, async (_, idx) => {
+          const n = idx + 1;
+          if (await fileExists(pdfName(n))) {
+            renderPdf(n);
+            enableTab(n);
+            found.push(n);
+          }
+        })
+      );
+      return found.sort((a, b) => a - b);
+    }
+
+    // ---------- ACTIVAR PESTAÑA (soporta "intro" o número) ----------
+    function activateTab(id) {
+      // quitar active de todos los botones
+      document.querySelectorAll(".tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", String(btn.dataset.tab) === String(id));
+      });
+
+      // quitar active de todos los paneles
+      document.querySelectorAll(".panel").forEach((panel) => {
+        panel.classList.toggle("active", panel.id === `panel-${id}`);
+      });
+
+      // hash (opcional)
+      if (id === "intro") {
+        window.location.hash = "intro";
+      } else {
+        window.location.hash = `semana-${id}`;
+      }
+    }
+
+    // ---------- INICIO ----------
+    async function init() {
+      buildTabs();
+      buildPanels();
+
+      const found = await detectPdfs();
+
+      // Leer hash: puede ser "intro" o "semana-N"
+      const hash = window.location.hash.replace('#', '');
+      let fromHash = null;
+      if (hash === "intro") fromHash = "intro";
+      else if (hash.startsWith("semana-")) {
+        const num = Number(hash.split("-")[1]);
+        if (!isNaN(num) && num >= 1 && num <= TOTAL_ENTREGAS) fromHash = num;
+      }
+
+      // Decidir pestaña inicial:
+      // - Si el hash apunta a "intro" → activar intro (siempre visible)
+      // - Si el hash apunta a una semana cuyo PDF existe → activar esa semana
+      // - Si no, activar la primera semana encontrada (si existe), o intro
+      let initial = "intro";
+      if (fromHash === "intro") {
+        initial = "intro";
+      } else if (typeof fromHash === "number" && found.includes(fromHash)) {
+        initial = fromHash;
+      } else if (found.length > 0) {
+        initial = found[0];
+      } else {
+        initial = "intro";
+      }
+
+      // Asegurar que el botón de introducción siempre esté habilitado (no se deshabilita)
+      // y activar la pestaña elegida
+      activateTab(initial);
+    }
+
+    init();
+  </script>
+</body>
+</html>
